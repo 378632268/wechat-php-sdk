@@ -1529,8 +1529,11 @@ class Wechat
 	 * @param string $method 签名方法
 	 * @return boolean|string 签名值
 	 */
-	public function getSignature($arrdata,$method="sha1") {
+	public function getSignature($arr,$method="sha1") {
 		if (!function_exists($method)) return false;
+		foreach ($arr as $k => $v){
+			$arrdata[strtolower($k)] = $v;
+		}
 		ksort($arrdata);
 		$paramstring = "";
 		foreach($arrdata as $key => $value)
