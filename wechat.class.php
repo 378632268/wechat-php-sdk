@@ -1628,6 +1628,58 @@ class Wechat
 	}
 	
 	/**
+	 * 生成商品详情回调xml
+	 *
+	 * @param string $out_trade_no
+	 *        	必填，商户系统内部的订单号,32个字符内,确保在商户系统唯一
+	 * @param string $body
+	 *        	必填，商品描述,128 字节以下
+	 * @param int $total_fee
+	 *        	必填，订单总金额,单位为分
+	 * @param string $notify_url
+	 *        	必填，支付完成通知回调接口，255 字节以内
+	 * @param string $spbill_create_ip
+	 *        	必填，用户终端IP，IPV4字串，15字节内
+	 * @param int $fee_type
+	 *        	必填，现金支付币种，默认1:人民币
+	 * @param string $bank_type
+	 *        	必填，银行通道类型,默认WX
+	 * @param string $input_charset
+	 *        	必填，传入参数字符编码，默认UTF-8，取值有UTF-8和GBK
+	 * @param string $time_start
+	 *        	交易起始时间,订单生成时间,格式yyyyMMddHHmmss
+	 * @param string $time_expire
+	 *        	交易结束时间,也是订单失效时间
+	 * @param int $transport_fee
+	 *        	物流费用,单位为分
+	 * @param int $product_fee
+	 *        	商品费用,单位为分,必须保证 transport_fee + product_fee=total_fee
+	 * @param string $goods_tag
+	 *        	商品标记,优惠券时可能用到
+	 * @param string $attach
+	 *        	附加数据，notify接口原样返回
+	 * @param string $ret_code
+	 *        	状态码，0为正确，其他为不正确
+	 * @param string $attach
+	 *        	提示信息，默认为ok
+	 * @return string
+	 */
+	public function createNativePackage($out_trade_no, $body, $total_fee, $notify_url, $spbill_create_ip, $fee_type = 1, $bank_type = "WX", $input_charset = "UTF-8", $time_start = "", $time_expire = "", $transport_fee = "", $product_fee = "", $goods_tag = "", $attach = "", $ret_code = 0, $ret_err_msg = 'ok') {
+		$nativeObj["AppId"] = $this->appid;
+		$nativeObj["appkey"] = $this->paysignkey;
+		$nativeObj["Package"] = $this->createPackage($out_trade_no, $body, $total_fee, $notify_url, $spbill_create_ip, $fee_type, $bank_type, $input_charset, $time_start, $time_expire, $transport_fee, $product_fee, $goods_tag, $attach);
+		$nativeObj["TimeStamp"] = time();
+		$nativeObj["NonceStr"] = $this->generateNonceStr ();
+		$nativeObj["RetCode"] = $ret_code;
+		$nativeObj["RetErrMsg"] = $ret_err_msg;
+		$nativeObj["AppSignature"] = $this->getSignature($nativeObj);
+		$nativeObj["SignMethod"] = "sha1";
+		unset ( $nativeObj ["appkey"] );
+
+		return  $this->xml_encode($nativeObj);
+	}
+	
+	/**
 	 * 支付签名(paySign)生成方法
 	 * @param string $package 订单详情字串
 	 * @param string $timeStamp 当前时间戳（需与JS输出的一致）
